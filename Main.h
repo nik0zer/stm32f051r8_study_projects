@@ -177,5 +177,7 @@ void SET_PIN_SPEED(int PORT, int PIN, int SPEED)
   }
 }
 
+#define RCC_ADC {RCC->APB2ENR |= RCC_APB2ENR_ADCEN;}
+
 
 #endif
