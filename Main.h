@@ -23,6 +23,14 @@
 #define AF6 6
 #define AF7 7
 
+#define NO_PUPDR 0
+#define PULL_UP 1
+#define PULL_DOWN 2
+
+#define LOW_SPEED 0
+#define MEDIUM_SPEED 1
+#define HIGH_SPEED 3
+
 #define FLASH_LATENCY_1WS()    { FLASH->ACR |= FLASH_ACR_LATENCY; }   //Set 1 wait state
 #define FLASH_LATENCY_0WS()    { FLASH->ACR &=~FLASH_ACR_LATENCY; }   //Set 0 wait state                                                                      
 #define FLASH_PREFETCH_EN()    { FLASH->ACR |= FLASH_ACR_PRFTBE;  }   //Turn On Flash prefetch(12 bytes per read)
@@ -81,31 +89,33 @@
   PLL_START();\
   RCC->CFGR |= RCC_CFGR_SW_PLL;})
 
-#define GPIO_MODER_IN(PORT, PIN) {((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))->MODER &= ~(3 << (PIN * 2));}
-#define GPIO_MODER_OUT(PORT, PIN) {((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))->MODER &= (3 << (PIN * 2)); ((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))->MODER |= (1 << (PIN * 2));}
-#define GPIO_MODER_ALTERNATIVE(PORT, PIN) {((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))->MODER &= (3 << (PIN * 2)); ((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))->MODER |= (2 << (PIN * 2));}
-#define GPIO_MODER_ANALOG(PORT, PIN) {((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))->MODER &= (3 << (PIN * 2)); ((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))->MODER |= (3 << (PIN * 2));}
+#define GPIOx ((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))
 
-#define GPIO_BSRR_UP(PORT, PIN) {((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))->BSRR |= (1 << PIN);}
-#define GPIO_BSRR_DOWN(PORT, PIN) {((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))->BSRR |= (1 << (16 + PIN));}
+#define GPIO_MODER_IN(PORT, PIN) {GPIOx->MODER &= ~(3 << (PIN * 2));}
+#define GPIO_MODER_OUT(PORT, PIN) {GPIOx->MODER &= (3 << (PIN * 2)); GPIOx->MODER |= (1 << (PIN * 2));}
+#define GPIO_MODER_ALTERNATIVE(PORT, PIN) {GPIOx->MODER &= (3 << (PIN * 2)); GPIOx->MODER |= (2 << (PIN * 2));}
+#define GPIO_MODER_ANALOG(PORT, PIN) {GPIOx->MODER &= (3 << (PIN * 2)); GPIOx->MODER |= (3 << (PIN * 2));}
+
+#define GPIO_BSRR_UP(PORT, PIN) {GPIOx->BSRR |= (1 << PIN);}
+#define GPIO_BSRR_DOWN(PORT, PIN) {GPIOx->BSRR |= (1 << (16 + PIN));}
 
 void SET_ALTERNATIVE_FUNC(int PORT, int PIN, int FUNC)
 {
   if(PIN >= 8)
   {
-    ((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))->AFRH &= ~(15 << ((PORT - 8) * 4));
-    ((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))->AFRH |= (FUNC << ((PORT - 8) * 4));
+    GPIOx->AFR[1] &= ~(15 << ((PORT - 8) * 4));
+    GPIOx->AFR[1] |= (FUNC << ((PORT - 8) * 4));
   }
   else
   {
-    ((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))->AFRL &= ~(15 << ((PORT) * 4));
-    ((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))->AFRL |= (FUNC << ((PORT) * 4));
+    GPIOx->AFR[0] &= ~(15 << ((PORT) * 4));
+    GPIOx->AFR[0] |= (FUNC << ((PORT) * 4));
   }
 }
 
 int DIGITAL_READ(int PORT, int PIN) //IDR
 {
-  return (((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))->IDR & (1 << PIN))
+  return (GPIOx->IDR & (1 << PIN));
 }
 
 void GPIO_MODER_PIN(int PORT, int PIN, int FUNC_OF_PIN)
@@ -138,6 +148,32 @@ void GPIO_BSRR_PIN(int PORT, int PIN, int VAL)
   else
   {
     GPIO_BSRR_DOWN(PORT, PIN);
+  }
+}
+
+void PUPDR_PIN(int PORT, int PIN, int VAL)
+{
+  if(!VAL)
+  {
+    GPIOx->PUPDR &= ~(3 << (PORT * 2));
+  }
+  else
+  {
+    GPIOx->PUPDR &= ~(3 << (PORT * 2));
+    GPIOx->PUPDR |= (VAL << (PORT * 2));
+  }
+}
+
+void SET_PIN_SPEED(int PORT, int PIN, int SPEED)
+{
+  if(!SPEED)
+  {
+    GPIOx->OSPEEDR &= ~(3 << (PORT * 2));
+  }
+  else
+  {
+    GPIOx->OSPEEDR &= ~(3 << (PORT * 2));
+    GPIOx->OSPEEDR |= (SPEED << (PORT * 2));
   }
 }
 
