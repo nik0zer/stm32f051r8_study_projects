@@ -3,6 +3,9 @@
 
 #include "stm32f0xx.h"
 
+
+
+
 #define A 0
 #define B 1
 #define C 2
@@ -79,15 +82,17 @@
 #define RCC_GPIOF() {RCC->AHBENR |= RCC_AHBENR_GPIOFEN;}
 
 
-#define PLL_MUL_TACT(MULTIPLIC) ({FLASH_LATENCY_1WS();\
+#define PLL_MUL_TACT(MULTIPLIC, AHB_DIV, APB_DIV) ({FLASH_LATENCY_1WS();\
   FLASH_PREFETCH_EN();\
   HSE_START();\
-  SET_AHB_PRESCALLER(AHB_DIV1);\
-  SET_APB_PRESCALLER(APB_DIV1);\
+  SET_AHB_PRESCALLER(AHB_DIV);\
+  SET_APB_PRESCALLER(APB_DIV);\
   PLL_MUL(MULTIPLIC);\
   PLLSourseHSI_DIV2();\
   PLL_START();\
-  RCC->CFGR |= RCC_CFGR_SW_PLL;})
+  RCC->CFGR |= RCC_CFGR_SW_PLL;\
+  SystemCoreClockUpdate();\
+})
 
 #define GPIOx ((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))
 
@@ -176,6 +181,29 @@ void SET_PIN_SPEED(int PORT, int PIN, int SPEED)
     GPIOx->OSPEEDR |= (SPEED << (PORT * 2));
   }
 }
+
+#define RCC_SYSTICK() { ;}
+
+#define DELAY_MS(MS) {\
+  SysTick->LOAD = SystemCoreClock/8000000*MS;\
+  SysTick->VAL = 0;\
+  SysTick->CTRL = 1;\
+    while(!(SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk)){}\
+    SysTick->CTRL = 0;\
+}
+
+
+#define NVIC_SETUP() {\
+\
+}
+
+
+
+
+
+
+
+
 
 #define RCC_ADC {RCC->APB2ENR |= RCC_APB2ENR_ADCEN;}
 
