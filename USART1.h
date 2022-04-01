@@ -54,6 +54,7 @@ int USART1_halfduplex_init(int speed)
   }
   USART1->ICR |= USART_ICR_TCCF; /* Clear TC flag */
   USART1->CR1 |= USART_CR1_TCIE; /* Enable TC interrupt */
+  NVIC_EnableIRQ(USART1_IRQn);
   return OK;
 }
 
@@ -62,9 +63,22 @@ int pin_set_USART1_halfduplex_mode(int PORT, int pin, int speed)
   USART1_halfduplex_init(speed);
   GPIO_MODER_PIN(PORT, pin, ALTERNATIVE);
   SET_ALTERNATIVE_FUNC(PORT, pin, ALTERNATIVE_USART);
+  return OK;
 }
 
-int USART1_transfer(char* bytes, size)
+int USART1_transfer_bytes(char* bytes, int size)
+{
+  int send_bytes = 0;
+  while(send_bytes < size)
+  {
+    while((USART1->ISR & USART_ISR_TC) != USART_ISR_TC){}
+    USART1->TDR = ((int)((char)bytes[send_bytes]));
+    send_bytes++;
+  }
+  return OK;
+}
+
+void USART1_IRQHandler()
 {
   
 }
