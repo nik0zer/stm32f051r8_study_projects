@@ -1,13 +1,18 @@
 ////////////////////////////////////////////
 #include "Main.h"
+#include <stdlib.h>
 #include "stm32f0xx.h"
 
 #define ALTERNATIVE_USART 1
 
+int size_of_unread_USART_data = 0;
+char* USART_data = NULL;
+
 enum ERRORS
 {
   OK = 0,
-  VALUE_OUT_OF_RANGE = 1
+  VALUE_OUT_OF_RANGE = 1,
+  BAD_INTERUPT_FLAG = 2
 };
 
 int oversampling = 16;
@@ -78,7 +83,18 @@ int USART1_transfer_bytes(char* bytes, int size)
   return OK;
 }
 
-void USART1_IRQHandler()
+int USART1_IRQHandler()
 {
-  
+  if((USART1->ISR & USART_ISR_RXNE) == USART_ISR_RXNE)
+  {
+    char data = (char)((uint8_t)(USART1->RDR));
+    size_of_unread_USART_data++;
+    USART_data = (char*)realloc(USART_data, size_of_unread_USART_data);
+    USART_data[size_of_unread_USART_data - 1] = data;
+    return OK;
+  }
+  else
+  {
+    return BAD_INTERUPT_FLAG;
+  }
 }
