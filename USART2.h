@@ -1,6 +1,7 @@
 #ifndef USART2_H
 #define USART2_H
 #include "Main.h"
+#include "stm32f0xx.h"
 
 #define RCC_USART2 {RCC->APB1ENR|=RCC_APB1ENR_USART2EN;}
 

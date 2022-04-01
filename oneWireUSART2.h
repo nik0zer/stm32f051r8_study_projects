@@ -2,6 +2,7 @@
 #define ONEWIRE_H
 #include "Main.h"
 #include "USART2.h"
+#include "stm32f0xx.h"
 
 #define OW_RESET            0xF0
 #define OW_W0               0x00

@@ -3,6 +3,8 @@
 
 #include "stm32f0xx.h"
 
+int APB_clock = 8000000;
+int AHB_clock = 8000000;
 
 
 
@@ -92,6 +94,8 @@
   PLL_START();\
   RCC->CFGR |= RCC_CFGR_SW_PLL;\
   SystemCoreClockUpdate();\
+  AHB_clock = 8000000 / 2 * MULTIPLIC / AHB_DIV;\
+  APB_clock = 8000000 / 2 * MULTIPLIC / AHB_DIV / APB_DIV;\
 })
 
 #define GPIOx ((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))
