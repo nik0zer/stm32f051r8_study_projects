@@ -24,6 +24,13 @@ enum oneWire_read_bit
 #define oneWire_BIT_1 0xFF
 #define oneWire_BIT_0 0x00
 
+#define SEARCH_ROM 0xF0
+#define READ_ROM 0x33
+#define SKIP_ROM 0xCC
+#define MATCH_ROM 0x55
+
+
+
 int oneWire_USART1_init(int PORT, int pin)
 {
   PUPDR_PIN(PORT, pin, PULL_UP);
