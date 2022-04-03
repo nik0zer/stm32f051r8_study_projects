@@ -65,7 +65,6 @@ int USART1_halfduplex_init(int speed)
 
 int pin_set_USART1_halfduplex_mode(int PORT, int pin, int speed)
 {
-  USART1_halfduplex_init(speed);
   GPIO_MODER_PIN(PORT, pin, ALTERNATIVE);
   SET_ALTERNATIVE_FUNC(PORT, pin, ALTERNATIVE_USART);
   return OK;
@@ -83,7 +82,7 @@ int USART1_transfer_bytes(char* bytes, int size)
   return OK;
 }
 
-int USART1_IRQHandler()
+void USART1_IRQHandler()
 {
   if((USART1->ISR & USART_ISR_RXNE) == USART_ISR_RXNE)
   {
@@ -91,10 +90,52 @@ int USART1_IRQHandler()
     size_of_unread_USART_data++;
     USART_data = (char*)realloc(USART_data, size_of_unread_USART_data);
     USART_data[size_of_unread_USART_data - 1] = data;
-    return OK;
   }
   else
   {
-    return BAD_INTERUPT_FLAG;
+    if((USART1->ISR & USART_ISR_TC) == USART_ISR_TC)
+    {
+      USART1->ICR |= USART_ICR_TCCF;
+    }
+    else
+    {
+      
+    }
   }
+}
+
+int USART1_change_speed(int new_speed)
+{
+  NVIC_DisableIRQ(USART1_IRQn);
+  USART1->CR1 &= ~USART_CR1_UE;
+  USART1->BRR = 16 / oversampling * APB_clock / new_speed;
+  USART1->CR1 |= USART_CR1_UE;
+  NVIC_EnableIRQ(USART1_IRQn);
+  return OK;
+}
+
+int USART1_init(int speed)
+{
+  set_oversampling_USART1(oversampling);
+  USART1->BRR = 16 / oversampling * APB_clock / speed;
+  USART1->CR1 = USART_CR1_TE | USART_CR1_RXNEIE
+  | USART_CR1_RE | USART_CR1_UE; /* (3) */
+  /* Polling idle frame Transmission */
+  while ((USART1->ISR & USART_ISR_TC) != USART_ISR_TC)
+  {
+    delay_ms(10);
+  }
+  USART1->ICR |= USART_ICR_TCCF; /* Clear TC flag */
+  USART1->CR1 |= USART_CR1_TCIE; /* Enable TC interrupt */
+  NVIC_EnableIRQ(USART1_IRQn);
+  return OK;
+}
+
+int set_TX_RX_pin_USART1(int PORT1, int pin1, int PORT2, int pin2)
+{
+  GPIO_MODER_PIN(PORT1, pin1, ALTERNATIVE);
+  SET_ALTERNATIVE_FUNC(PORT1, pin1, ALTERNATIVE_USART);
+  GPIO_MODER_PIN(PORT2, pin2, ALTERNATIVE);
+  SET_ALTERNATIVE_FUNC(PORT2, pin2, ALTERNATIVE_USART);
+  return OK;
 }

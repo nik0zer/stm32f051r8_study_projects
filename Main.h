@@ -94,10 +94,11 @@ int AHB_clock = 8000000;
   PLL_START();\
   RCC->CFGR |= RCC_CFGR_SW_PLL;\
   SystemCoreClockUpdate();\
-  AHB_clock = 8000000 / 2 * MULTIPLIC / AHB_DIV;\
-  APB_clock = 8000000 / 2 * MULTIPLIC / AHB_DIV / APB_DIV;\
+  AHB_clock = 8000000 / 2 * MULTIPLIC;\
+  APB_clock = 8000000 / 2 * MULTIPLIC;\
 })
 
+  
 #define GPIOx ((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))
 
 #define GPIO_MODER_IN(PORT, PIN) {GPIOx->MODER &= ~(3 << (PIN * 2));}
