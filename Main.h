@@ -189,18 +189,15 @@ void SET_PIN_SPEED(int PORT, int PIN, int SPEED)
 
 #define RCC_SYSTICK() { ;}
 
-#define DELAY_MS(MS) {\
-  SysTick->LOAD = SystemCoreClock/8000000*MS;\
-  SysTick->VAL = 0;\
-  SysTick->CTRL = 1;\
-    while(!(SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk)){}\
-    SysTick->CTRL = 0;\
+void delay_msk(int msk) 
+{
+  SysTick->LOAD = SystemCoreClock/8000000*msk;
+  SysTick->VAL = 0;
+  SysTick->CTRL = 1;
+  while(!(SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk)){}
+  SysTick->CTRL = 0;
 }
 
-
-#define NVIC_SETUP() {\
-\
-}
 
 
 

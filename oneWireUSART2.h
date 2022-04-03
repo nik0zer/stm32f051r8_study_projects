@@ -1,5 +1,5 @@
-#ifndef ONEWIRE_H
-#define ONEWIRE_H
+#ifndef ONEWIREUSART2_H
+#define ONEWIREUSART2_H
 #include "Main.h"
 #include "USART2.h"
 #include "stm32f0xx.h"
