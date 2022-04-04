@@ -102,9 +102,9 @@ int AHB_clock = 8000000;
 #define GPIOx ((GPIO_TypeDef *)(AHB2PERIPH_BASE + 0x00000400 * PORT))
 
 #define GPIO_MODER_IN(PORT, PIN) {GPIOx->MODER &= ~(3 << (PIN * 2));}
-#define GPIO_MODER_OUT(PORT, PIN) {GPIOx->MODER &= (3 << (PIN * 2)); GPIOx->MODER |= (1 << (PIN * 2));}
-#define GPIO_MODER_ALTERNATIVE(PORT, PIN) {GPIOx->MODER &= (3 << (PIN * 2)); GPIOx->MODER |= (2 << (PIN * 2));}
-#define GPIO_MODER_ANALOG(PORT, PIN) {GPIOx->MODER &= (3 << (PIN * 2)); GPIOx->MODER |= (3 << (PIN * 2));}
+#define GPIO_MODER_OUT(PORT, PIN) {GPIOx->MODER &= ~(3 << (PIN * 2)); GPIOx->MODER |= (1 << (PIN * 2));}
+#define GPIO_MODER_ALTERNATIVE(PORT, PIN) {GPIOx->MODER &= ~(3 << (PIN * 2)); GPIOx->MODER |= (2 << (PIN * 2));}
+#define GPIO_MODER_ANALOG(PORT, PIN) {GPIOx->MODER &= ~(3 << (PIN * 2)); GPIOx->MODER |= (3 << (PIN * 2));}
 
 #define GPIO_BSRR_UP(PORT, PIN) {GPIOx->BSRR |= (1 << PIN);}
 #define GPIO_BSRR_DOWN(PORT, PIN) {GPIOx->BSRR |= (1 << (16 + PIN));}
@@ -113,13 +113,13 @@ void SET_ALTERNATIVE_FUNC(int PORT, int PIN, int FUNC)
 {
   if(PIN >= 8)
   {
-    GPIOx->AFR[1] &= ~(15 << ((PORT - 8) * 4));
-    GPIOx->AFR[1] |= (FUNC << ((PORT - 8) * 4));
+    GPIOx->AFR[1] &= ~(15 << ((PIN - 8) * 4));
+    GPIOx->AFR[1] |= (FUNC << ((PIN - 8) * 4));
   }
   else
   {
-    GPIOx->AFR[0] &= ~(15 << ((PORT) * 4));
-    GPIOx->AFR[0] |= (FUNC << ((PORT) * 4));
+    GPIOx->AFR[0] &= ~(15 << ((PIN) * 4));
+    GPIOx->AFR[0] |= (FUNC << ((PIN) * 4));
   }
 }
 
