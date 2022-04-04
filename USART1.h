@@ -45,6 +45,7 @@ int set_oversampling_USART1(int new_oversampling)
 
 int USART1_halfduplex_init(int speed)
 {
+  RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
   /* (1) Oversampling by 16, 9600 baud */
   /* (2) Single-wire half-duplex mode */
   /* (3) 8 data bit, 1 start bit, 1 stop bit, no parity, reception and
@@ -61,6 +62,8 @@ int USART1_halfduplex_init(int speed)
     delay_msk(10);
   }
   USART1->ICR |= USART_ICR_TCCF; /* Clear TC flag */
+  USART1->TDR = ((int)('0'));
+  
   NVIC_EnableIRQ(USART1_IRQn);
   return OK;
 }
@@ -129,17 +132,14 @@ int USART1_change_speed(int new_speed)
 
 int USART1_init(int speed)
 {
+  RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
   USART1_speed = speed;
   set_oversampling_USART1(oversampling);
   USART1->BRR = 16 / oversampling * APB_clock / USART1_speed;
   USART1->CR1 = USART_CR1_TE | USART_CR1_RXNEIE
-  | USART_CR1_RE | USART_CR1_UE; /* (3) */
-  /* Polling idle frame Transmission */
-  while ((USART1->ISR & USART_ISR_TC) != USART_ISR_TC)
-  {
-    delay_msk(10);
-  }
+  | USART_CR1_RE | USART_CR1_UE;
   USART1->ICR |= USART_ICR_TCCF; /* Clear TC flag */
+  USART1->TDR = ((int)('0'));
   NVIC_EnableIRQ(USART1_IRQn);
   return OK;
 }
