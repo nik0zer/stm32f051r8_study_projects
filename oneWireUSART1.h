@@ -59,7 +59,7 @@ int reset_oneWire_USART1()
   return return_int;
 }
 
-int send_bit(int bit)
+int send_bit_oneWire_USART1(int bit)
 {
   USART1_change_speed(oneWire_SEND_speed);
   if(bit == 1)
@@ -80,7 +80,7 @@ int send_bit(int bit)
   return OK;
 }
 
-int read_bit()
+int read_bit_oneWire_USART1()
 {
   USART1_change_speed(oneWire_SEND_speed);
   USART1_transfer_byte(oneWire_BIT_1);
@@ -99,6 +99,23 @@ int read_bit()
   return return_int;
 }
 
+int send_byte_oneWire_USART1(char byte)
+{
+  for(int i = 0; i < sizeof(byte) * 8; i++)
+  {
+    send_bit_oneWire_USART1((byte & (1 << i)) && 1);
+  }
+  return OK;
+}
 
+char read_byte_oneWire_USART1()
+{
+  char byte = 0;
+  for(int i = 0; i < 8; i++)
+  {
+    byte += (read_bit_oneWire_USART1() << i);
+  }
+  return byte;
+}
 
 #endif
