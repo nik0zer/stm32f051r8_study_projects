@@ -1,8 +1,8 @@
 ////////////////////////////////////////////
 #ifndef USART1_H
 #define USART1_H
-#include "Main.h"
 #include <stdlib.h>
+#include "System.h"
 
 #define ALTERNATIVE_USART 1
 

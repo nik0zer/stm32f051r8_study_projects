@@ -1,14 +1,13 @@
 #ifndef ONEWIREUSART2_H
 #define ONEWIREUSART2_H
-
-#include "Main.h"
+#include "System.h"
 #include <stdlib.h>
 #include "USART1.h"
 
 enum oneWire_returns
 {
-  NO_DEVISES = 0,
-  DEVISES_FOUND = 1
+  DEVISES_FOUND = 0,
+  NO_DEVISES = 1
 };
 
 enum oneWire_read_bit
@@ -31,9 +30,9 @@ enum oneWire_read_bit
 
 
 
-int oneWire_USART1_init(int PORT, int pin)
+int init_oneWire_USART1(int PORT, int pin)
 {
-  PUPDR_PIN(PORT, pin, PULL_UP);
+  GPIO_PUPDR_PIN(PORT, pin, PULL_UP);
   USART1_halfduplex_init(9600);
   pin_set_USART1_halfduplex_mode(PORT, pin);
   return OK;
